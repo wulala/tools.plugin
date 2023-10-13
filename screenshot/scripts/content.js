@@ -1,31 +1,86 @@
-let scrollElemInfo = {
-    elem: document.body, // 滚动元素
-    scrolltimes: 1, // 滚动次数
-    scrollnow: 0, // 当前滚动次
-    divH: 0, // 元素高度
-}
-
 let captureInfo = {
     base64: [],
 }
 
-let screenShotArr = []
-
-var btn = document.createElement('button')
-btn.innerText = '点击按钮哦'
-btn.style.position = 'fixed'
-btn.style.zIndex = 9999
-btn.style.top = 0
-btn.style.left = 0
+let toolbar = document.createElement('five-toolbar')
+toolbar.classList.add(`__five-toolbar`)
+let btnCapture = document.createElement('five-capture')
+btnCapture.classList.add(`__five-btn`, `__five-capture`)
+btnCapture.innerText = 'capture'
+btnCapture.addEventListener('click', (e) => {
+    if (selectElem) start(selectElem)
+})
+toolbar.appendChild(btnCapture)
+document.querySelector('body').appendChild(toolbar)
 
 var img = document.createElement('img')
 img.className = '__xx'
+document.querySelector('body').appendChild(img)
 
-document.querySelector('body').appendChild(btn)
+/**
+ * ---------------------------选择dom元素开始-------------------------------
+ */
 
-btn.addEventListener('click', (e) => {
-    start(document.querySelector('.__test'))
-})
+let blockElem = null // 鼠标移入元素
+let selectElem = null // 选中元素
+
+document.body.addEventListener('mouseover', over, false)
+document.body.addEventListener('mouseout', out, false)
+document.body.addEventListener('click', click, false)
+
+function over(e) {
+    if (e.target.classList.value.indexOf('__five') != -1) return console.log('我是插件元素')
+
+    blockElem = findClosestBlockElement(e.target)
+    if (selectElem) return console.log('已经有选中元素了，因为要对选中元素编辑')
+    if (!blockElem) return console.log('没有找到block元素')
+    blockElem.classList.add('__hover')
+}
+function out(e) {
+    if (selectElem == blockElem) return console.log('当前已选中，要保留选中状态哦')
+    blockElem.classList.remove('__hover')
+}
+function click(e) {
+    e.stopPropagation()
+    e.preventDefault()
+
+    // 如果已选中，再次点击
+    if (selectElem == blockElem) {
+        selectElem = null
+        blockElem.classList.remove('__hover')
+        return
+    }
+    // 没过没选中
+    if (selectElem) selectElem.classList.remove('__hover')
+    selectElem = blockElem
+    blockElem.classList.add('__hover')
+}
+// 判断元素本身是否为块级元素
+function isBlockElement(element) {
+    const computedStyle = window.getComputedStyle(element)
+    const displayValue = computedStyle.getPropertyValue('display')
+    return (
+        displayValue === 'block' ||
+        displayValue === 'inline-block' ||
+        displayValue === 'list-item' ||
+        displayValue === 'table' ||
+        displayValue === 'table-cell' ||
+        displayValue === 'flex' ||
+        displayValue === 'inline-flex' ||
+        displayValue === 'grid' ||
+        displayValue === 'inline-grid'
+    )
+}
+// 查找具有块级显示属性的最近父元素
+function findClosestBlockElement(element) {
+    if (isBlockElement(element)) return element
+    if (element.parentElement) return findClosestBlockElement(element.parentElement)
+    return null
+}
+
+/**
+ * ---------------------------选择dom元素完成-------------------------------
+ */
 
 function start(elem) {
     // reset
@@ -38,19 +93,25 @@ function start(elem) {
     let rectInfo = elem.getBoundingClientRect()
 
     // 统一滚动到顶部， 好计算滚屏次数
-
     document.documentElement.scrollTo(0, scrollTop + rectInfo.y)
 
     // 滚动完，更新一下位置信息
     rectInfo = elem.getBoundingClientRect()
+
+    // todo:
+    // 如果有横向滚动，元素可能不在屏幕内
 
     captureInfo = {
         rect: rectInfo, // 保存坐标信息，用来截图
         times: Math.ceil(rectInfo.height / clientHeight), // 需要滚动的次数
         current: 1, // 当前滚动第几次
         windowH: clientHeight,
+        windowW: clientWidth,
         base64: [],
     }
+
+    // 隐藏 __hover
+    selectElem.classList.remove('__hover')
 
     // 开始截图
     capture()
@@ -66,8 +127,6 @@ function capture() {
 }
 
 function next() {
-    console.log(captureInfo, '-=-')
-
     if (captureInfo.current >= captureInfo.times) return complete()
 
     captureInfo.current += 1
@@ -83,61 +142,38 @@ function next() {
     setTimeout(capture, 1000 / 3)
 }
 
-function complete() {
+async function complete() {
+    let { rect, base64, windowH, windowW } = captureInfo
     let canvas = document.createElement('canvas')
-    canvas.width = captureInfo.width
-    canvas.height = captureInfo.height * captureInfo.base64.length
+
+    canvas.width = rect.width
+    canvas.height = rect.height * base64.length
 
     let context = canvas.getContext('2d')
 
-    captureInfo.base64.forEach((item, index) => {
+    for (let index = 0; index < base64.length; index++) {
+        let item = base64[index]
         let img = new Image()
         img.src = item
-        context.drawImage(img, 0, captureInfo.windowH * index)
-    })
+        await new Promise((resolve, reject) => {
+            img.onload = resolve
+            img.onerror = reject
+        })
 
-    canvas.toBlob((blob) => {
-        const url = URL.createObjectURL(blob)
-
-        img.onload = () => {
-            // no longer need to read the blob so it's revoked
-            URL.revokeObjectURL(url)
-        }
-
-        img.src = url
-        document.querySelector('body').appendChild(img)
-    })
-}
-
-/**
- * 查找元素本身或者最近的父元素是overflow-y: auto的元素
- * @param {*} element
- * @returns
- */
-function findOverflowYElement(element) {
-    if (!element || element == document.body) return document.body
-
-    let overflowY = window.getComputedStyle(element).getPropertyValue('overflow-y')
-
-    if (overflowY === 'auto' || overflowY === 'scroll') {
-        return element
+        context.drawImage(img, -rect.x, -rect.y)
     }
 
-    return findOverflowYElement(element.parentNode)
-}
+    // canvas.toBlob((blob) => {
+    //     const url = URL.createObjectURL(blob)
 
-/**
- * 获取滚动元素的内容高度和div高度
- * @param {DOM} element
- */
-function getScrollElementHeight(element) {
-    let scrollElem = findOverflowYElement(element)
+    //     img.onload = () => {
+    //         // no longer need to read the blob so it's revoked
+    //         // URL.revokeObjectURL(url)
+    //     }
 
-    scrollElemInfo.elem = scrollElem
+    //     img.src = url
+    //     document.querySelector('body').appendChild(img)
+    // })
 
-    let contentH = scrollElem.scrollHeight // 总高度
-    let divH = scrollElem.clientHeight // div设定的高度
-
-    scrollElemInfo.scrolltimes = contentH == divH ? 1 : Math.ceil(contentH / divH)
-    scrollElemInfo.divH = divH
+    document.querySelector('body').appendChild(canvas)
 }
