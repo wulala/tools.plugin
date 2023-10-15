@@ -92,7 +92,7 @@ function start(elem) {
     // 获取元素信息
     let rectInfo = elem.getBoundingClientRect()
 
-    // 统一滚动到顶部， 好计算滚屏次数
+    // 滚动到顶部， 让要截图的的元素出现在屏幕中...
     document.documentElement.scrollTo(0, scrollTop + rectInfo.y)
 
     // 滚动完，更新一下位置信息
@@ -110,11 +110,22 @@ function start(elem) {
         base64: [],
     }
 
+
+
+    handlerDom()
+
+    // 因为处理DOM元素内部有延迟...
+    setTimeout(capture, 100)
+}
+
+/**
+ * 处理页面
+ */
+function handlerDom() {
     // 隐藏 __hover
     selectElem.classList.remove('__hover')
+    blockElem.classList.remove('__hover')
 
-    // 开始截图
-    capture()
 }
 
 function capture() {
@@ -139,7 +150,7 @@ function next() {
     body.scrollTo(0, scrollTop + clientHeight)
 
     // https://developer.chrome.com/docs/extensions/reference/tabs/#property-MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND ... 一秒只能调用两次
-    setTimeout(capture, 1000 / 3)
+    setTimeout(capture, 1000 / 2)
 }
 
 async function complete() {
@@ -147,10 +158,10 @@ async function complete() {
     let canvas = document.createElement('canvas')
 
     canvas.width = rect.width
-    canvas.height = rect.height * base64.length
+    canvas.height = rect.height
 
     let context = canvas.getContext('2d')
-
+    console.log(rect, '---')
     for (let index = 0; index < base64.length; index++) {
         let item = base64[index]
         let img = new Image()
@@ -159,8 +170,7 @@ async function complete() {
             img.onload = resolve
             img.onerror = reject
         })
-
-        context.drawImage(img, -rect.x, -rect.y)
+        context.drawImage(img, rect.x, -rect.y, rect.width, rect.height, 0, windowH * index, rect.width, rect.height)
     }
 
     // canvas.toBlob((blob) => {
