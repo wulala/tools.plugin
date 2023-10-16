@@ -17,6 +17,9 @@ var img = document.createElement('img')
 img.className = '__xx'
 document.querySelector('body').appendChild(img)
 
+let cover = document.createElement('five-cover')
+cover.classList.add('__five-cover')
+
 /**
  * ---------------------------选择dom元素开始-------------------------------
  */
@@ -34,11 +37,17 @@ function over(e) {
     blockElem = findClosestBlockElement(e.target)
     if (selectElem) return console.log('已经有选中元素了，因为要对选中元素编辑')
     if (!blockElem) return console.log('没有找到block元素')
-    blockElem.classList.add('__hover')
+    // blockElem.classList.add('__hover')
+
+    let rect = blockElem.getBoundingClientRect()
+
+    cover.style.transform = `translate(${rect.x}px, ${rect.y})`
+    blockElem.appendChild(cover)
 }
 function out(e) {
     if (selectElem == blockElem) return console.log('当前已选中，要保留选中状态哦')
-    blockElem.classList.remove('__hover')
+    // blockElem.classList.remove('__hover')
+    blockElem.removeChild(cover)
 }
 function click(e) {
     e.stopPropagation()
@@ -47,13 +56,18 @@ function click(e) {
     // 如果已选中，再次点击
     if (selectElem == blockElem) {
         selectElem = null
-        blockElem.classList.remove('__hover')
+        // blockElem.classList.remove('__hover')
+        blockElem.removeChild(cover)
         return
     }
     // 没过没选中
-    if (selectElem) selectElem.classList.remove('__hover')
+    if (selectElem) {
+        // selectElem.classList.remove('__hover')
+        selectElem.removeChild(cover)
+    }
     selectElem = blockElem
-    blockElem.classList.add('__hover')
+    // blockElem.classList.add('__hover')
+    blockElem.appendChild(cover)
 }
 // 判断元素本身是否为块级元素
 function isBlockElement(element) {
@@ -71,7 +85,7 @@ function isBlockElement(element) {
         displayValue === 'inline-grid'
     )
 }
-// 查找具有块级显示属性的最近父元素
+// 查找具有块级显示属性的最近父元素,(找块元素)
 function findClosestBlockElement(element) {
     if (isBlockElement(element)) return element
     if (element.parentElement) return findClosestBlockElement(element.parentElement)
@@ -93,6 +107,7 @@ function start(elem) {
     let rectInfo = elem.getBoundingClientRect()
 
     // 滚动到顶部， 让要截图的的元素出现在屏幕中...
+    // 在先有的滚动条基础上， 移动rectinfo.y的距离
     document.documentElement.scrollTo(0, scrollTop + rectInfo.y)
 
     // 滚动完，更新一下位置信息
@@ -110,12 +125,10 @@ function start(elem) {
         base64: [],
     }
 
-
-
     handlerDom()
 
     // 因为处理DOM元素内部有延迟...
-    setTimeout(capture, 100)
+    // setTimeout(capture, 100)
 }
 
 /**
@@ -123,9 +136,33 @@ function start(elem) {
  */
 function handlerDom() {
     // 隐藏 __hover
-    selectElem.classList.remove('__hover')
-    blockElem.classList.remove('__hover')
+    // selectElem.classList.remove('__hover')
+    // blockElem.classList.remove('__hover')
 
+    selectElem.removeChild(cover)
+    blockElem.removeChild(cover)
+
+    document.querySelectorAll('*').forEach((element) => {
+        //
+
+        // 隐藏 fixed 元素
+        var position = window.getComputedStyle(element).getPropertyValue('position')
+        if (position == 'fixed') {
+            // 除了它自身以外，所有fixed元素都先隐藏
+            if (element != selectElem) element.classList.add('__five-fixed-hide')
+        }
+        // 粘性定位暂停
+        if (position == 'sticky') element.classList.add('__five-fixed-to-relative')
+
+        // 隐藏所有滚动条
+        document.body.classList.add('__five-scroll-hide')
+        let overflow = window.getComputedStyle(element).getPropertyValue('overflow')
+        let overflowX = window.getComputedStyle(element).getPropertyValue('overflow-x')
+        let overflowY = window.getComputedStyle(element).getPropertyValue('overflow-y')
+        if (overflow == 'auto' || overflow == 'scroll' || overflowX == 'auto' || overflowX == 'scroll' || overflowY == 'auto' || overflowY == 'scroll') {
+            element.classList.add('__five-scroll-hide')
+        }
+    })
 }
 
 function capture() {
@@ -161,7 +198,7 @@ async function complete() {
     canvas.height = rect.height
 
     let context = canvas.getContext('2d')
-    console.log(rect, '---')
+
     for (let index = 0; index < base64.length; index++) {
         let item = base64[index]
         let img = new Image()
@@ -186,4 +223,9 @@ async function complete() {
     // })
 
     document.querySelector('body').appendChild(canvas)
+}
+
+function scroll(e) {
+    e.stopPropagation()
+    e.preventDefault()
 }

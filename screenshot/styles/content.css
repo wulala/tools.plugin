@@ -65,3 +65,28 @@
 .__five-fn {
     display: flex;
 }
+
+.__five-fixed-hide {
+    display: none !important;
+}
+.__five-fixed-to-relative {
+    position: relative !important;
+}
+
+.__five-scroll-hide::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    background: transparent;
+}
+
+.__five-cover {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(3, 169, 243, 0.1);
+    outline: 1px dashed rgba(3, 169, 243, 1);
+    outline-offset: -1px;
+    pointer-events: none;
+}
