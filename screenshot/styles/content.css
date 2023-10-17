@@ -7,20 +7,35 @@ five-toolbar {
     left: 12px;
     display: flex;
     border-radius: 3px;
-    z-index: 999;
+    z-index: 999999999;
 }
+
 five-toolbar svg {
     height: 16px;
     display: block;
     fill: #999;
+    pointer-events: none;
 }
+
 five-select {
     padding: 12px;
 }
+
 five-toolbar svg:hover,
-five-toolbar svg.__on {
+.__five-on svg {
     fill: rgba(3, 169, 243, 1);
 }
+
+five-cover {
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: rgba(3, 169, 243, 0.1);
+    pointer-events: none;
+    z-index: 999;
+    display: none;
+}
+
 
 .__hover {
     position: relative;
@@ -67,6 +82,7 @@ five-toolbar svg.__on {
 .__five-fixed-hide {
     display: none !important;
 }
+
 .__five-fixed-to-relative {
     position: relative !important;
 }
@@ -77,21 +93,12 @@ five-toolbar svg.__on {
     background: transparent;
 }
 
-.__five-cover {
-    position: fixed;
-    left: 0;
-    top: 0;
-    background: rgba(3, 169, 243, 0.1);
-    /* outline: 0.6px dashed rgba(3, 169, 243, 1); */
-    /* outline-offset: -1px; */
-    pointer-events: none;
-    z-index: 999;
-    display: none;
-}
+
 
 .__five-hide {
     display: none !important;
 }
+
 .__five-show {
     display: block !important;
 }

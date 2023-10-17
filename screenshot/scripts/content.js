@@ -18,8 +18,13 @@ toolbar.innerHTML = `<five-select class="__five-select">
         d="M559.786667 512l314.026666-314.026667c13.653333-13.653333 13.653333-34.133333 0-47.786666-13.653333-13.653333-34.133333-13.653333-47.786666 0L512 464.213333 197.973333 150.186667c-13.653333-13.653333-34.133333-13.653333-47.786666 0-13.653333 13.653333-13.653333 34.133333 0 47.786666l314.026666 314.026667-314.026666 314.026667c-13.653333 13.653333-13.653333 34.133333 0 47.786666 13.653333 13.653333 34.133333 13.653333 47.786666 0l314.026667-314.026666 314.026667 314.026666c13.653333 13.653333 34.133333 13.653333 47.786666 0 13.653333-13.653333 13.653333-34.133333 0-47.786666L559.786667 512z"
     ></path>
 </svg>
-</five-select>`
-document.querySelector('body').appendChild(toolbar)
+</five-select>
+<five-cover class="__five-cover"></five-cover>`
+document.body.appendChild(toolbar)
+
+
+// 鼠标移入的覆盖层（用于标记选中的区域）
+let cover = document.querySelector('.__five-cover')
 
 document.querySelector('.__five-select').addEventListener('click', (e) => {
     e.target.classList.add('__five-on')
@@ -28,74 +33,71 @@ document.querySelector('.__five-select').addEventListener('click', (e) => {
     let body = document.documentElement
     let clonedElement = body.cloneNode(true)
     body.parentNode.replaceChild(clonedElement, body)
+
+    // 重新获取元素
+    cover = document.querySelector('.__five-cover')
+
+    //  重新添加事件
+    document.querySelector('.__five-exit').addEventListener('click', (e) => location.reload())
+
+
+    // 添加选择事件
+    document.body.addEventListener('mouseover', over, false)
+    // document.body.addEventListener('mouseout', out, false)
+    document.body.addEventListener('click', click, false)
+
 })
 
-// reload页面，因为事件都被移除了
+// 刷新页面，因为事件都被移除了
 document.querySelector('.__five-exit').addEventListener('click', (e) => location.reload())
 
-var img = document.createElement('img')
-img.className = '__xx'
-document.querySelector('body').appendChild(img)
 
-let cover = document.createElement('five-cover')
-cover.classList.add('__five-cover')
-document.querySelector('body').appendChild(cover)
+
+
 
 /**
  * ---------------------------选择dom元素开始-------------------------------
  */
 
-let blockElem = null // 鼠标移入元素
+let overElem = null // 鼠标移入元素
 let selectElem = null // 选中元素
 
-document.body.addEventListener('mousedown', down, false)
-document.body.addEventListener('mouseover', over, false)
-// document.body.addEventListener('mouseout', out, false)
-document.body.addEventListener('click', click, false)
-
-function down(e) {
-    e.stopPropagation()
-    e.preventDefault()
-}
 
 function over(e) {
+
+
     if (e.target.classList.value.indexOf('__five') != -1) return console.log('mouseover 我是插件元素')
 
-    blockElem = findClosestBlockElement(e.target)
+    overElem = findClosestBlockElement(e.target)
+    if (!overElem) return console.log('没有找到block元素')
     if (selectElem) return console.log('已经有选中元素了，因为要对选中元素编辑')
-    if (!blockElem) return console.log('没有找到block元素')
-    // blockElem.classList.add('__hover')
 
-    let rect = blockElem.getBoundingClientRect()
+    let rect = overElem.getBoundingClientRect()
     cover.style.transform = `translate(${rect.x}px, ${rect.y}px)`
     cover.style.width = `${rect.width}px`
     cover.style.height = `${rect.height}px`
+
     cover.classList.add(`__five-show`)
 }
 function out(e) {
     if (e.target.classList.value.indexOf('__five') != -1) return console.log('mouseout, 我是插件元素')
-    if (selectElem == blockElem) return console.log('当前已选中，要保留选中状态哦')
-    // blockElem.classList.remove('__hover')
+    if (selectElem == overElem) return console.log('当前已选中，要保留选中状态哦')
     cover.classList.remove(`__five-show`)
 }
 function click(e) {
-    e.stopPropagation()
     e.preventDefault()
 
     // 如果已选中，再次点击
-    if (selectElem == blockElem) {
+    if (selectElem == overElem) {
         selectElem = null
-        // blockElem.classList.remove('__hover')
         cover.classList.remove(`__five-show`)
         return
     }
     // 没过没选中
     if (selectElem) {
-        // selectElem.classList.remove('__hover')
         cover.classList.remove(`__five-show`)
     }
-    selectElem = blockElem
-    // blockElem.classList.add('__hover')
+    selectElem = overElem
     cover.classList.add(`__five-show`)
 }
 // 判断元素本身是否为块级元素
