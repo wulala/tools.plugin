@@ -4,20 +4,20 @@ let insertTabs = []
 // 确定采用chrome.debugger 方式不行。因为会有个弹窗
 
 chrome.action.onClicked.addListener(async (tab) => {
-    if (insertTabs.includes(tab.id)) {
-        // 已经注入就不操作了
-        console.log('已经启用')
-    } else {
-        await chrome.scripting.insertCSS({
-            files: ['styles/content.css'],
-            target: { tabId: tab.id },
-        })
-        await chrome.scripting.executeScript({
-            files: ['scripts/content.js'],
-            target: { tabId: tab.id },
-        })
-        insertTabs.push(tab.id)
-    }
+    // if (insertTabs.includes(tab.id)) {
+    //     // 已经注入就不操作了
+    //     return console.log('已经启用')
+    // }
+
+    await chrome.scripting.insertCSS({
+        files: ['styles/content.css'],
+        target: { tabId: tab.id },
+    })
+    await chrome.scripting.executeScript({
+        files: ['scripts/content.js'],
+        target: { tabId: tab.id },
+    })
+    insertTabs.push(tab.id)
 })
 
 // addListener方法不能加async

@@ -7,15 +7,44 @@
         <link rel="stylesheet" href="styles/content.css" />
     </head>
     <body>
-        <div class="__five-toolbar">
-            <div class="__five-btn">capture</div>
-            <!-- <div class="__five-name">Hover capture</div>
-            <div class="__five-fn"></div> -->
-        </div>
+        <style>
+            five-toolbar {
+                box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+                display: block;
+                position: fixed;
+                display: flex;
+                border-radius: 3px;
+                z-index: 999;
+            }
+            five-toolbar svg {
+                height: 16px;
+                display: block;
+                fill: #999;
+            }
+            five-select {
+                padding: 12px;
+            }
+            five-toolbar svg:hover,
+            .__five-on svg {
+                fill: rgba(3, 169, 243, 1);
+            }
+        </style>
 
-        <p>
-            sadfsadf
-            <five-dvi>aslfdjasdlkfj </five-dvi>
-        </p>
+        <five-toolbar>
+            <five-select class="__five-select __five-on">
+                <svg viewBox="0 0 1024 1024">
+                    <path
+                        d="M990.691556 731.847111L1024 688.967111 577.550222 342.101333 848.298667 71.352889 0 0.839111l70.513778 848.312889 261.034666-261.048889 355.328 435.057778 42.069334-34.346667-393.329778-481.592889L114.944 727.907556 59.434667 60.273778 727.068444 115.768889 495.630222 347.221333z"
+                    ></path>
+                </svg>
+            </five-select>
+            <five-select class="__five-exit">
+                <svg viewBox="0 0 1024 1024">
+                    <path
+                        d="M559.786667 512l314.026666-314.026667c13.653333-13.653333 13.653333-34.133333 0-47.786666-13.653333-13.653333-34.133333-13.653333-47.786666 0L512 464.213333 197.973333 150.186667c-13.653333-13.653333-34.133333-13.653333-47.786666 0-13.653333 13.653333-13.653333 34.133333 0 47.786666l314.026666 314.026667-314.026666 314.026667c-13.653333 13.653333-13.653333 34.133333 0 47.786666 13.653333 13.653333 34.133333 13.653333 47.786666 0l314.026667-314.026666 314.026667 314.026666c13.653333 13.653333 34.133333 13.653333 47.786666 0 13.653333-13.653333 13.653333-34.133333 0-47.786666L559.786667 512z"
+                    ></path>
+                </svg>
+            </five-select>
+        </five-toolbar>
     </body>
 </html>
