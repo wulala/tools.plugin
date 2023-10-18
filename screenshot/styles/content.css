@@ -1,5 +1,5 @@
-five-toolbar {
-    box-shadow: 0 0 6px rgba(3, 169, 243, 0.2);
+five-tool {
+    box-shadow: 0 0 6px rgba(3, 169, 243, 0.5);
     background-color: #fff;
     display: block;
     position: fixed;
@@ -10,32 +10,44 @@ five-toolbar {
     z-index: 999999999;
 }
 
-five-toolbar svg {
+five-tool svg {
     height: 16px;
     display: block;
     fill: #999;
     pointer-events: none;
 }
 
-five-select {
+five-btn {
     padding: 12px;
 }
 
-five-toolbar svg:hover,
+five-tool svg:hover,
 .__five-on svg {
     fill: rgba(3, 169, 243, 1);
 }
 
-five-cover {
+five-cover,
+five-node {
     position: fixed;
     left: 0;
     top: 0;
     background: rgba(3, 169, 243, 0.1);
     pointer-events: none;
-    z-index: 999;
+    z-index: 99;
     display: none;
+    outline: 0.6px dashed rgba(3, 169, 243, 0.75);
+    outline-offset: 0.6px;
 }
 
+five-node {
+    background: rgba(255, 192, 203, 0.3);
+    outline-color: rgba(255, 192, 203, 0.75);
+    z-index: 999;
+}
+
+.__five-can svg {
+    fill: rgba(255, 192, 203, 1);
+}
 
 .__hover {
     position: relative;
@@ -92,8 +104,6 @@ five-cover {
     height: 0;
     background: transparent;
 }
-
-
 
 .__five-hide {
     display: none !important;
