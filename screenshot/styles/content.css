@@ -91,11 +91,7 @@ five-node {
     display: flex;
 }
 
-.__five-fixed-hide {
-    display: none !important;
-}
-
-.__five-fixed-to-relative {
+.__five-relative {
     position: relative !important;
 }
 
@@ -111,4 +107,8 @@ five-node {
 
 .__five-show {
     display: block !important;
+}
+
+.__five-opacity {
+    opacity: 0.6 !important;
 }

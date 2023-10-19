@@ -8,6 +8,7 @@ let toPicBtn = null // 生成按钮
 
 let overElem = null // 鼠标移入块元素
 let selectElem = null // 选中元素
+let elemParentOfBody = null // 查找鼠标移入/选中元素的父级（查找到body子元素层级
 
 // ----------------------------- 工具条插入 start -----------------------------
 let toolbar = document.createElement('five-toolbar')
@@ -139,22 +140,17 @@ function click(e) {
  * 开始截图
  * @param {*} elem
  */
-function start(elem) {
+function start() {
     // reset
     captureInfo = { base64: [] }
 
     // 获取当前浏览器的宽高滚动条高度
     let { clientWidth, clientHeight, scrollTop } = document.documentElement
 
-    // 获取元素信息
-    let rectInfo = elem.getBoundingClientRect()
-
-    // 滚动到顶部， 让要截图的的元素出现在屏幕中...
-    // 在先有的滚动条基础上， 移动rectinfo.y的距离
-    document.documentElement.scrollTo(0, scrollTop + rectInfo.y)
+    handlerDom()
 
     // 滚动完，更新一下位置信息
-    rectInfo = elem.getBoundingClientRect()
+    rectInfo = selectElem.getBoundingClientRect()
 
     // todo:
     // 如果有横向滚动，元素可能不在屏幕内
@@ -168,40 +164,41 @@ function start(elem) {
         base64: [],
     }
 
-    handlerDom()
-
     // 因为处理DOM元素内部有延迟...
-    // setTimeout(capture, 100)
+    setTimeout(capture, 250)
 }
 
 /**
- * 处理页面
+ * 处理dom元素
  */
 function handlerDom() {
-    selectElem.removeChild(cover)
-    blockElem.removeChild(cover)
+    // 隐藏插件元素
+    toolbar.classList.add('__five-hide')
+    overCover.classList.add('__five-hide')
+    nodeCover.classList.add('__five-hide')
 
     document.querySelectorAll('*').forEach((element) => {
-        //
-
-        // 隐藏 fixed 元素
+        // 隐藏 fixed 元素， 避免滚动截图时候会有fixed元素遮挡
         var position = window.getComputedStyle(element).getPropertyValue('position')
         if (position == 'fixed') {
             // 除了它自身以外，所有fixed元素都先隐藏
-            if (element != selectElem) element.classList.add('__five-fixed-hide')
+            if (element != selectElem) element.classList.add('__five-hide')
         }
         // 粘性定位暂停
-        if (position == 'sticky') element.classList.add('__five-fixed-to-relative')
+        if (position == 'sticky') element.classList.add('__five-relative')
 
         // 隐藏所有滚动条
-        document.body.classList.add('__five-scroll-hide')
-        let overflow = window.getComputedStyle(element).getPropertyValue('overflow')
-        let overflowX = window.getComputedStyle(element).getPropertyValue('overflow-x')
-        let overflowY = window.getComputedStyle(element).getPropertyValue('overflow-y')
-        if (overflow == 'auto' || overflow == 'scroll' || overflowX == 'auto' || overflowX == 'scroll' || overflowY == 'auto' || overflowY == 'scroll') {
-            element.classList.add('__five-scroll-hide')
-        }
+        element.classList.add('__five-scroll-hide')
     })
+
+    // 获取元素信息
+    let rectInfo = selectElem.getBoundingClientRect()
+
+    let scrollElem = findClosestScrollElement(selectElem)
+
+    // 滚动到顶部， 让要截图的的元素出现在屏幕中...
+    // 在先有的滚动条基础上， 移动rectinfo.y的距离
+    document.documentElement.scrollTo(0, scrollTop + rectInfo.y)
 }
 
 function capture() {
@@ -276,17 +273,7 @@ function out(e) {
 function isBlockElement(element) {
     const computedStyle = window.getComputedStyle(element)
     const displayValue = computedStyle.getPropertyValue('display')
-    return (
-        displayValue === 'block' ||
-        displayValue === 'inline-block' ||
-        displayValue === 'list-item' ||
-        displayValue === 'table' ||
-        displayValue === 'table-cell' ||
-        displayValue === 'flex' ||
-        displayValue === 'inline-flex' ||
-        displayValue === 'grid' ||
-        displayValue === 'inline-grid'
-    )
+    return ['block', 'inline-block', 'list-item', 'table', 'table-cell', 'flex', 'inline-flex', 'grid', 'inline-grid'].includes(displayValue)
 }
 // 查找具有块级显示属性的最近父元素,(找块元素)
 function findClosestBlockElement(element) {
@@ -295,8 +282,24 @@ function findClosestBlockElement(element) {
     return null
 }
 
+// 判断元素本身是否为可滚动元素
+function isScrollElement(element) {
+    const computedStyle = window.getComputedStyle(element)
+    // todo: 目前只判断纵向滚动
+    const overflowYValue = computedStyle.getPropertyValue('overflow-y')
+    return ['auto', 'scroll'].includes(overflowYValue)
+}
+
+function findClosestScrollElement(element) {
+    if (isBlockElement(element)) return element
+    if (element.parentElement) return findClosestScrollElement(element.parentElement)
+    return null
+}
+
+/**
+ * 移除所有元素的hover伪类样式
+ */
 function removeHover() {
-    // 遍历每个元素，并移除其hover伪类样式
     document.querySelectorAll('*').forEach((element) => {
         const computedStyle = window.getComputedStyle(element)
         const originalStyle = computedStyle.getPropertyValue('style')
@@ -306,6 +309,14 @@ function removeHover() {
             element.style.setProperty('style', originalStyle)
         }
     })
+}
+
+function findParent(elem) {
+    // parentElement 在找根节点会报错，parentNode会返回 document
+    const body = document.body
+    let parent = elem.parentElement
+    if (parent == body) return elem
+    return findParent(parent)
 }
 
 // ---------------------------------------辅助函数 end------------------------------------------------------
