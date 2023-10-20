@@ -10,6 +10,8 @@ let overElem = null // 鼠标移入块元素
 let selectElem = null // 选中元素
 let rectInfo = null // selectElem元素的rect
 let elemParentOfBody = null // 查找鼠标移入/选中元素的父级（查找到body子元素层级
+let imgElem = document.createElement('img')
+imgElem.classList.add('__five-screenshot')
 
 // ----------------------------- 工具条插入 start -----------------------------
 let toolbar = document.createElement('five-toolbar')
@@ -237,7 +239,7 @@ async function complete() {
     let canvas = document.createElement('canvas')
 
     canvas.width = rect.width
-    canvas.height = rect.height
+    canvas.height = Math.ceil(rect.height)
 
     let context = canvas.getContext('2d')
 
@@ -252,19 +254,16 @@ async function complete() {
         context.drawImage(img, rect.x, -rect.y, rect.width, rect.height, 0, windowH * index, rect.width, rect.height)
     }
 
-    // canvas.toBlob((blob) => {
-    //     const url = URL.createObjectURL(blob)
+    canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob)
 
-    //     img.onload = () => {
-    //         // no longer need to read the blob so it's revoked
-    //         // URL.revokeObjectURL(url)
-    //     }
+        imgElem.onload = () => URL.revokeObjectURL(url)
 
-    //     img.src = url
-    //     document.querySelector('body').appendChild(img)
-    // })
+        imgElem.src = url
+        document.querySelector('body').appendChild(imgElem)
+    })
 
-    document.querySelector('body').appendChild(canvas)
+    // document.querySelector('body').appendChild(canvas)
 }
 
 function out(e) {
