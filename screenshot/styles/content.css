@@ -35,13 +35,13 @@ five-node {
     pointer-events: none;
     z-index: 99;
     display: none;
-    outline: 0.6px dashed rgba(3, 169, 243, 0.75);
-    outline-offset: 0.6px;
+    /* outline: 0.6px dashed rgba(3, 169, 243, 0.75);
+    outline-offset: 0.6px; */
 }
 
 five-node {
     background: rgba(255, 192, 203, 0.3);
-    outline-color: rgba(255, 192, 203, 0.75);
+    /* outline-color: rgba(255, 192, 203, 0.75); */
     z-index: 999;
 }
 

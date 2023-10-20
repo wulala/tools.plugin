@@ -8,6 +8,7 @@ let toPicBtn = null // 生成按钮
 
 let overElem = null // 鼠标移入块元素
 let selectElem = null // 选中元素
+let rectInfo = null // selectElem元素的rect
 let elemParentOfBody = null // 查找鼠标移入/选中元素的父级（查找到body子元素层级
 
 // ----------------------------- 工具条插入 start -----------------------------
@@ -149,12 +150,6 @@ function start() {
 
     handlerDom()
 
-    // 滚动完，更新一下位置信息
-    rectInfo = selectElem.getBoundingClientRect()
-
-    // todo:
-    // 如果有横向滚动，元素可能不在屏幕内
-
     captureInfo = {
         rect: rectInfo, // 保存坐标信息，用来截图
         times: Math.ceil(rectInfo.height / clientHeight), // 需要滚动的次数
@@ -172,9 +167,11 @@ function start() {
  * 处理dom元素
  */
 function handlerDom() {
+    let { clientWidth, clientHeight, scrollTop } = document.documentElement
     // 隐藏插件元素
     toolbar.classList.add('__five-hide')
     overCover.classList.add('__five-hide')
+    nodeCover.classList.remove('__five-show')
     nodeCover.classList.add('__five-hide')
 
     document.querySelectorAll('*').forEach((element) => {
@@ -191,14 +188,23 @@ function handlerDom() {
         element.classList.add('__five-scroll-hide')
     })
 
-    // 获取元素信息
-    let rectInfo = selectElem.getBoundingClientRect()
+    // 获取选中元素的信息
+    rectInfo = selectElem.getBoundingClientRect()
 
-    let scrollElem = findClosestScrollElement(selectElem)
-
-    // 滚动到顶部， 让要截图的的元素出现在屏幕中...
+    // 滚动到选中元素的顶部， 让要截图的的元素出现在屏幕中...
     // 在先有的滚动条基础上， 移动rectinfo.y的距离
     document.documentElement.scrollTo(0, scrollTop + rectInfo.y)
+
+    // 获取选中元素最近的滚动父元素
+    let scrollElem = findClosestScrollElement(selectElem)
+
+    // todo: 内部滚动条也要滚动到合理位置
+    scrollElem.scrollTo(0, 0)
+
+    // todo: 如果有横向滚动，元素可能不在屏幕内
+
+    // 滚动完，更新一下位置信息
+    rectInfo = selectElem.getBoundingClientRect()
 }
 
 function capture() {
