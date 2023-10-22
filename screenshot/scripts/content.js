@@ -1,3 +1,5 @@
+
+
 let captureInfo = {
     base64: [],
 }
@@ -17,6 +19,13 @@ imgElem.classList.add('__five-screenshot')
 let toolbar = document.createElement('five-toolbar')
 toolbar.innerHTML = `
 <five-tool class="__five-tool">
+    <five-btn class="__five-unlock">
+    <svg viewBox="0 0 1024 1024">
+        <path
+            d="M838.4 68.266667h-512c-46.933333 0-85.333333 36.266667-85.333333 81.066666v38.4H185.6c-46.933333 0-85.333333 38.4-85.333333 85.333334v597.333333c0 46.933333 38.4 85.333333 85.333333 85.333333h512c46.933333 0 85.333333-38.4 85.333333-85.333333v-36.266667h55.466667c46.933333 0 85.333333-38.4 85.333333-85.333333v-597.333333c0-44.8-38.4-83.2-85.333333-83.2z m-98.133333 802.133333c0 23.466667-19.2 42.666667-42.666667 42.666667h-512c-23.466667 0-42.666667-19.2-42.666667-42.666667v-597.333333c0-23.466667 19.2-42.666667 42.666667-42.666667h512c23.466667 0 42.666667 19.2 42.666667 42.666667v597.333333z m140.8-119.466667c0 23.466667-19.2 42.666667-42.666667 42.666667h-55.466667V273.066667c0-46.933333-38.4-85.333333-85.333333-85.333334H283.733333V149.333333c0-21.333333 19.2-38.4 42.666667-38.4h512c23.466667 0 42.666667 19.2 42.666667 42.666667v597.333333z m-450.133334-83.2h-204.8c-12.8 0-21.333333 8.533333-21.333333 21.333334s8.533333 21.333333 21.333333 21.333333h204.8c12.8 0 21.333333-8.533333 21.333334-21.333333s-10.666667-21.333333-21.333334-21.333334z m98.133334-10.666666c-17.066667 0-32 14.933333-32 32s14.933333 32 32 32 32-14.933333 32-32-12.8-32-32-32z m128-234.666667H224c-12.8 0-21.333333 8.533333-21.333333 21.333333s8.533333 21.333333 21.333333 21.333334h433.066667c12.8 0 21.333333-8.533333 21.333333-21.333334s-8.533333-21.333333-21.333333-21.333333z"
+        ></path>
+    </svg>
+    </five-btn>
     <five-btn class="__five-select">
     <svg viewBox="0 0 1024 1024">
         <path
@@ -81,6 +90,42 @@ document.querySelector('.__five-select').addEventListener('click', (e) => {
     document.body.addEventListener('mouseover', over, false)
     document.body.addEventListener('click', click, false)
 })
+
+document.querySelector('.__five-unlock').addEventListener('click', unLock, false)
+
+function unLock() {
+
+    let style = document.createElement("style")
+    style.innerHTML = `  * {-webkit-user-select: text !important } `
+    document.body.appendChild(style)
+
+    // 保存原生的addEventListener方法
+    const originalAddEventListener = EventTarget.prototype.addEventListener
+
+    console.log(originalAddEventListener, '===')
+
+    // 自定义addEventListener方法
+    EventTarget.prototype.addEventListener = function (type, listener, options) {
+        console.log(type, '===')
+        // 右键事件,不做处理
+        if (type === 'contextmenu') return
+        // 其他正常事件,调用原生方法
+        originalAddEventListener.call(this, type, listener, options)
+    }
+
+    // 处理已绑定的contextmenu事件
+    document.oncontextmenu = () => true
+    document.querySelectorAll('*').forEach(element => element.oncontextmenu = () => true)
+
+    // 循环处理动态添加的元素, 一些滚动加载的页面
+    // setInterval(() => {
+    //     document.querySelectorAll('*').forEach(element => element.oncontextmenu = () => true)
+    // }, 200)
+
+
+
+
+}
 
 // 退出截图工具
 document.querySelector('.__five-exit').addEventListener('click', (e) => {
